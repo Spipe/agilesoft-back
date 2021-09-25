@@ -6,6 +6,7 @@ dotenv.config();
 app.use(express.json());
 
 require("./src/routes/users.routes")(app);
+require("./src/routes/tasks.routes")(app);
 
 app.listen(3000, () => {
   console.log(`Server on port 3000`);

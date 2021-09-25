@@ -22,7 +22,7 @@ exports.create = async (req, res) => {
       res.status(500).send({
         message: err.message,
       });
-    } else res.send({ auth: true, token: token, nombre: users.nombre });
+    } else res.send({ auth: true, token: token });
   });
 };
 
@@ -61,15 +61,23 @@ exports.userData = (req, res) => {
       message: "No token provided",
     });
   } else {
-    const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
-    Users.findOneById(decoded.id, (err, data) => {
-      if (err) {
-        res.status(500).send({
-          message: err.message,
-        });
-      } else {
-        res.send(data);
-      }
-    });
+    try {
+      const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
+      Users.findOneById(decoded.id, (err, data) => {
+        if (err) {
+          res.status(500).send({
+            message: err.message,
+          });
+        } else {
+          res.send(data);
+        }
+      });
+    } catch (err) {
+      console.log("error: ", err);
+      res.status(401).json({
+        auth: false,
+        message: "Wrong Token or not provided",
+      });
+    }
   }
 };
