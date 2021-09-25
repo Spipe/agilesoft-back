@@ -1,5 +1,6 @@
 const sql = require("./db.js");
 
+//Constructor de Tasks
 const Tasks = function (Tasks) {
   this.id_usuario = Tasks.id_usuario;
   this.nombre = Tasks.nombre;

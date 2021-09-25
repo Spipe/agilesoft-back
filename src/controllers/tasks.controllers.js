@@ -1,8 +1,8 @@
 const Tasks = require("../models/tasks.models");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
 
 exports.create = async (req, res) => {
+  //Se extraen los headers con la informacion de autorizacion
   const authorization = req.get("authorization");
   if (!req.body) {
     res.status(400).send({
@@ -19,6 +19,7 @@ exports.create = async (req, res) => {
       message: "No token provided",
     });
   } else {
+    //Si esta la informacion enviada y el token generado se verifica su validez
     try {
       const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
       let date = new Date();
@@ -30,6 +31,7 @@ exports.create = async (req, res) => {
         fecha_creacion: date,
         fecha_actualizacion: date,
       });
+      //Una vez validado se crea la nueva tarea
       Tasks.create(tasks, (err, data) => {
         if (err) {
           res.status(500).send({
