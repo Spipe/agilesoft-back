@@ -43,7 +43,7 @@ Tasks.remove = (userId, taskId, result) => {
 };
 Tasks.getAllByUser = (userId, result) => {
   sql.query(
-    `SELECT T.id, T.nombre,T.estado FROM usuarios as U INNER JOIN tareas as T ON  U.id=T.id_usuario WHERE U.id=${userId};`,
+    `SELECT T.id, T.nombre,T.estado, T.fecha_actualizacion FROM usuarios as U INNER JOIN tareas as T ON  U.id=T.id_usuario WHERE U.id=${userId};`,
     (err, res) => {
       if (err) {
         console.log("error: ", err);

@@ -22,7 +22,7 @@ exports.create = async (req, res) => {
       res.status(500).send({
         message: err.message,
       });
-    } else res.send({ auth: true, token: token });
+    } else res.status(200).send({ auth: true, token: token });
   });
 };
 
