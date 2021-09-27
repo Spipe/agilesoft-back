@@ -3,10 +3,11 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
 exports.create = async (req, res) => {
-  if (!req.body) {
+  if (!req.body.username || !req.body.password || !req.body.nombre) {
     res.status(400).send({
       message: "El contenido no debe estar vacio",
     });
+    return;
   }
   const users = new Users({
     username: req.body.username,
@@ -27,6 +28,12 @@ exports.create = async (req, res) => {
 };
 
 exports.login = (req, res) => {
+  if (!req.body.username || !req.body.password) {
+    res.status(400).send({
+      message: "El contenido no debe estar vacio",
+    });
+    return;
+  }
   Users.findOne(req.body.username, async (err, data) => {
     const passwordCorrect =
       data == null
@@ -60,24 +67,24 @@ exports.userData = (req, res) => {
       auth: false,
       message: "No token provided",
     });
-  } else {
-    try {
-      const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
-      Users.findOneById(decoded.id, (err, data) => {
-        if (err) {
-          res.status(500).send({
-            message: err.message,
-          });
-        } else {
-          res.send(data);
-        }
-      });
-    } catch (err) {
-      console.log("error: ", err);
-      res.status(401).json({
-        auth: false,
-        message: "Wrong Token or not provided",
-      });
-    }
+    return;
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
+    Users.findOneById(decoded.id, (err, data) => {
+      if (err) {
+        res.status(500).send({
+          message: err.message,
+        });
+      } else {
+        res.send(data);
+      }
+    });
+  } catch (err) {
+    console.log("error: ", err);
+    res.status(401).json({
+      auth: false,
+      message: "Wrong Token or not provided",
+    });
   }
 };

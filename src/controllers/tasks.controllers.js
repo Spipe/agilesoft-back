@@ -4,10 +4,11 @@ const jwt = require("jsonwebtoken");
 exports.create = async (req, res) => {
   //Se extraen los headers con la informacion de autorizacion
   const authorization = req.get("authorization");
-  if (!req.body) {
+  if (!req.body.nombre || !req.body.descripcion) {
     res.status(400).send({
       message: "El contenido no debe estar vacio",
     });
+    return;
   }
   let token = null;
   if (authorization && authorization.toLowerCase().startsWith("bearer")) {
@@ -26,7 +27,7 @@ exports.create = async (req, res) => {
       const tasks = new Tasks({
         id_usuario: decoded.id,
         nombre: req.body.nombre,
-        estado: req.body.estado,
+        estado: false,
         descripcion: req.body.descripcion,
         fecha_creacion: date,
         fecha_actualizacion: date,
@@ -99,11 +100,15 @@ exports.findAllByUser = (req, res) => {
     try {
       const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
       Tasks.getAllByUser(decoded.id, (err, data) => {
-        if (err) {
-          res.status(500).send({
-            message: err.message,
+        if (err.kind === "not_found") {
+          res.status(404).send({
+            message: `User without Tasks`,
           });
-        } else res.send(data);
+        } else {
+          res.status(500).send({
+            message: "Could not delete Task with id " + req.params.taskId,
+          });
+        }
       });
     } catch (err) {
       console.log("error: ", err);
