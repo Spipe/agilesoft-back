@@ -60,6 +60,7 @@ exports.delete = async (req, res) => {
       auth: false,
       message: "No token provided",
     });
+    return;
   } else {
     try {
       const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
@@ -100,15 +101,19 @@ exports.findAllByUser = (req, res) => {
     try {
       const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
       Tasks.getAllByUser(decoded.id, (err, data) => {
-        if (err.kind === "not_found") {
-          res.status(404).send({
-            message: `User without Tasks`,
-          });
-        } else {
-          res.status(500).send({
-            message: "Could not delete Task with id " + req.params.taskId,
-          });
+        if (err) {
+          if (err.kind === "not_found") {
+            res.status(404).send({
+              message: `User without Tasks`,
+            });
+          } else {
+            res.status(500).send({
+              message: err.message,
+            });
+          }
+          return;
         }
+        res.send(data);
       });
     } catch (err) {
       console.log("error: ", err);
@@ -137,10 +142,18 @@ exports.updateStateById = (req, res) => {
       let date = new Date();
       Tasks.updateState(decoded.id, req.params.taskId, date, (err, data) => {
         if (err) {
-          res.status(500).send({
-            message: err.message,
-          });
-        } else res.send({ message: data.message });
+          if (err.kind === "not_found") {
+            res.status(404).send({
+              message: `User without Tasks`,
+            });
+          } else {
+            res.status(500).send({
+              message: err.message,
+            });
+          }
+          return;
+        }
+        res.send({ message: data.message });
       });
     } catch (err) {
       console.log("error: ", err);

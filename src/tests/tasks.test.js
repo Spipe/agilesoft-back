@@ -23,7 +23,7 @@ beforeAll((done) => {
 });
 
 describe("TASKS", () => {
-  test.skip("Get all for user authorized not found", async () => {
+  test("Get data for user authorized not found", async () => {
     await api
       .get("/api/get/tasks")
       .set("Authorization", `Bearer ${token}`)
@@ -68,8 +68,40 @@ describe("TASKS", () => {
       .expect(401)
       .expect("Content-Type", /application\/json/);
   });
-
-  test("Get all for user unauthorized", async () => {
+  test("Update", async () => {
+    await api
+      .put(`/api/update/task/${taskId}`)
+      .set("Authorization", `Bearer ${token}`)
+      .then((res) => {
+        expect(res.status).toBe(200);
+        expect(res.type).toBe("application/json");
+      });
+  });
+  test("Update unauthorized", async () => {
+    await api
+      .put(`/api/update/task/${taskId}`)
+      .expect(401)
+      .expect("Content-Type", /application\/json/);
+  });
+  test("Update not found", async () => {
+    await api
+      .put(`/api/update/task/0`)
+      .set("Authorization", `Bearer ${token}`)
+      .then((res) => {
+        expect(res.status).toBe(404);
+        expect(res.type).toBe("application/json");
+      });
+  });
+  test("Get data", async () => {
+    await api
+      .get("/api/get/tasks")
+      .set("Authorization", `Bearer ${token}`)
+      .then((res) => {
+        expect(res.status).toBe(200);
+        expect(res.type).toBe("application/json");
+      });
+  });
+  test("Get data for user unauthorized", async () => {
     await api
       .get("/api/get/tasks")
       .expect(401)
@@ -77,33 +109,28 @@ describe("TASKS", () => {
   });
   test("Delete", async () => {
     await api
-      .post(`/api/delete/task/2`)
+      .delete(`/api/delete/task/${taskId}`)
       .set("Authorization", `Bearer ${token}`)
       .then((res) => {
         expect(res.status).toBe(200);
         expect(res.type).toBe("application/json");
       });
   });
-  test("Delete not found", async () => {
+
+  test("Delete unauthorized", async () => {
     await api
-      .post("/api/delete/task/0")
-      .set("Authorization", `Bearer ${token}`)
-      .then((res) => {
-        expect(res.status).toBe(404);
-        expect(res.type).toBe("text/html");
-      });
-  });
-  test("Delete unathorized", async () => {
-    await api
-      .post("/api/delete/task/2")
+      .delete("/api/delete/task/5")
       .expect(401)
       .expect("Content-Type", /application\/json/);
   });
   test("Delete not found", async () => {
     await api
-      .post("/api/delete/task/0")
-      .expect(404)
-      .expect("Content-Type", /text\/html/);
+      .delete("/api/delete/task/0")
+      .set("Authorization", `Bearer ${token}`)
+      .then((res) => {
+        expect(res.status).toBe(404);
+        expect(res.type).toBe("application/json");
+      });
   });
 });
 
