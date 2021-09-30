@@ -15,15 +15,12 @@ exports.create = async (req, res) => {
     nombre: req.body.nombre,
   });
   users.password = await Users.encryptPassword(users.password);
-  const token = jwt.sign({ id: users._id }, process.env.SECRET_TOKEN, {
-    expiresIn: 60 * 60 * 24,
-  });
   Users.create(users, (err, data) => {
     if (err) {
       res.status(500).send({
         message: err.message,
       });
-    } else res.status(200).send({ auth: true, token: token });
+    } else res.status(200).send({ auth: true });
   });
 };
 
