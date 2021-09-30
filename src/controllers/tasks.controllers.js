@@ -144,7 +144,7 @@ exports.updateStateById = (req, res) => {
         if (err) {
           if (err.kind === "not_found") {
             res.status(404).send({
-              message: `User without Tasks`,
+              message: `User without Tasks with id ${req.params.taskId}`,
             });
           } else {
             res.status(500).send({
