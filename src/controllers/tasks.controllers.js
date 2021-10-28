@@ -4,10 +4,11 @@ const jwt = require("jsonwebtoken");
 exports.create = async (req, res) => {
   //Se extraen los headers con la informacion de autorizacion
   const authorization = req.get("authorization");
-  if (!req.body) {
+  if (!req.body.nombre || !req.body.descripcion) {
     res.status(400).send({
       message: "El contenido no debe estar vacio",
     });
+    return;
   }
   let token = null;
   if (authorization && authorization.toLowerCase().startsWith("bearer")) {
@@ -26,7 +27,7 @@ exports.create = async (req, res) => {
       const tasks = new Tasks({
         id_usuario: decoded.id,
         nombre: req.body.nombre,
-        estado: req.body.estado,
+        estado: false,
         descripcion: req.body.descripcion,
         fecha_creacion: date,
         fecha_actualizacion: date,
@@ -59,6 +60,7 @@ exports.delete = async (req, res) => {
       auth: false,
       message: "No token provided",
     });
+    return;
   } else {
     try {
       const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
@@ -100,10 +102,18 @@ exports.findAllByUser = (req, res) => {
       const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
       Tasks.getAllByUser(decoded.id, (err, data) => {
         if (err) {
-          res.status(500).send({
-            message: err.message,
-          });
-        } else res.send(data);
+          if (err.kind === "not_found") {
+            res.status(404).send({
+              message: `User without Tasks`,
+            });
+          } else {
+            res.status(500).send({
+              message: err.message,
+            });
+          }
+          return;
+        }
+        res.send(data);
       });
     } catch (err) {
       console.log("error: ", err);
@@ -132,10 +142,18 @@ exports.updateStateById = (req, res) => {
       let date = new Date();
       Tasks.updateState(decoded.id, req.params.taskId, date, (err, data) => {
         if (err) {
-          res.status(500).send({
-            message: err.message,
-          });
-        } else res.send({ message: data.message });
+          if (err.kind === "not_found") {
+            res.status(404).send({
+              message: `User without Tasks with id ${req.params.taskId}`,
+            });
+          } else {
+            res.status(500).send({
+              message: err.message,
+            });
+          }
+          return;
+        }
+        res.send({ message: data.message });
       });
     } catch (err) {
       console.log("error: ", err);
