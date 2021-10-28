@@ -10,5 +10,4 @@ require("./src/routes/tasks.routes")(app);
 const server = app.listen(3000, () => {
   console.log(`Server on port 3000`);
 });
-console.log("Pruebas de test")
 module.exports = { app, server };
